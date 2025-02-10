@@ -1,0 +1,31 @@
+# 环境配置
+environment: test  # 当前运行环境：test/prod
+
+# 环境参数
+env:
+  test:
+    base_url: "http://api.test.com"
+    username: "test_user"
+    password: "test_pass"
+    timeout: 10
+    verify_ssl: false
+  prod:
+    base_url: "http://api.prod.com"
+    username: "prod_user"
+    password: "prod_pass"
+    timeout: 30
+    verify_ssl: true
+
+# 通用请求头
+headers:
+  Content-Type: "application/json"
+  User-Agent: "Mozilla/5.0"
+
+# 添加邮件配置
+email:
+  smtp_host: "smtp.163.com"
+  smtp_port: 465
+  sender: "your_email@163.com"
+  password: "your_email_password"  # 邮箱授权码
+  receivers: ["receiver1@example.com", "receiver2@example.com"]
+  subject: "API自动化测试报告" 

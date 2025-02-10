@@ -1,0 +1,24 @@
+test_cases:
+  - case_name: "用户登录成功"
+    path: "/api/login"
+    method: "POST"
+    data:
+      username: "test_user"
+      password: "test_pass"
+    expected:
+      status_code: 200
+      contains_fields: ["token", "user_id"]
+      field_values:
+        message: "Login successful"
+        status: "success"
+
+  - case_name: "获取用户信息"
+    path: "/api/user/info"
+    method: "GET"
+    headers:
+      Authorization: "Bearer {token}"  # 使用登录接口返回的token
+    expected:
+      status_code: 200
+      contains_fields: ["username", "email"]
+      field_values:
+        username: "test_user" 
