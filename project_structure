@@ -1,1 +1,24 @@
- 
+api_test_framework/
+├── config/
+│   ├── config.yaml              # 环境、邮件等配置
+│   └── logging_config.yaml      # 日志配置
+├── data/
+│   └── test_data.yaml          # 测试用例数据
+├── common/
+│   ├── __init__.py
+│   ├── http_client.py          # HTTP请求封装
+│   ├── assertions.py           # 自定义断言方法
+│   ├── yaml_handler.py         # YAML文件处理
+│   ├── logger.py              # 日志处理
+│   └── email_handler.py       # 邮件发送处理
+├── testcases/
+│   ├── __init__.py
+│   └── test_api.py            # 测试用例
+├── logs/                      # 日志文件目录
+├── reports/                   # 测试报告目录
+│   ├── allure_results/        # Allure原始结果
+│   └── html_*/               # 生成的HTML报告
+├── conftest.py               # pytest配置和钩子函数
+├── pytest.ini               # pytest配置文件
+├── requirements.txt         # 项目依赖
+└── run_tests.py            # 测试执行入口 

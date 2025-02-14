@@ -23,9 +23,9 @@ headers:
 
 # 添加邮件配置
 email:
-  smtp_host: "smtp.163.com"
-  smtp_port: 465
-  sender: "your_email@163.com"
-  password: "your_email_password"  # 邮箱授权码
-  receivers: ["receiver1@example.com", "receiver2@example.com"]
+  smtp_host: "smtp.qq.com"
+  smtp_port: 465  # QQ邮箱使用465端口进行SSL连接
+  sender: "xxxxxx@qq.com" # 发送者邮箱
+  password: "xxxxxxx"  # QQ邮箱授权码，修改为自己的授权码
+  receivers: ["xxxxxx@163.com"] # 接收者邮箱
   subject: "API自动化测试报告" 

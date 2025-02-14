@@ -1,3 +1,8 @@
+# token配置
+token_config:
+  expire_time: 3600  # token过期时间（秒）
+  refresh_before_expire: 300  # token过期前多少秒刷新（5分钟）
+
 test_cases:
   - case_name: "用户登录成功"
     path: "/api/login"
@@ -7,7 +12,7 @@ test_cases:
       password: "test_pass"
     expected:
       status_code: 200
-      contains_fields: ["token", "user_id"]
+      contains_fields: ["token", "user_id", "expire_time"]
       field_values:
         message: "Login successful"
         status: "success"
@@ -16,7 +21,7 @@ test_cases:
     path: "/api/user/info"
     method: "GET"
     headers:
-      Authorization: "Bearer {token}"  # 使用登录接口返回的token
+      Authorization: "Bearer {token}"
     expected:
       status_code: 200
       contains_fields: ["username", "email"]
