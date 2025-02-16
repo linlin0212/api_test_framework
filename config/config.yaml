@@ -4,17 +4,44 @@ environment: test  # 当前运行环境：test/prod
 # 环境参数
 env:
   test:
-    base_url: "http://api.test.com"
-    username: "test_user"
-    password: "test_pass"
-    timeout: 10
-    verify_ssl: false
+    # 用户服务
+    user_service:
+      base_url: "http://user-api.test.com"
+      timeout: 10
+      verify_ssl: false
+    # 订单服务
+    order_service:
+      base_url: "http://order-api.test.com"
+      timeout: 15
+      verify_ssl: false
+    # 支付服务
+    payment_service:
+      base_url: "http://payment-api.test.com"
+      timeout: 20
+      verify_ssl: false
+    # 默认服务配置
+    default:
+      base_url: "http://api.test.com"
+      timeout: 10
+      verify_ssl: false
+      
   prod:
-    base_url: "http://api.prod.com"
-    username: "prod_user"
-    password: "prod_pass"
-    timeout: 30
-    verify_ssl: true
+    user_service:
+      base_url: "http://user-api.prod.com"
+      timeout: 30
+      verify_ssl: true
+    order_service:
+      base_url: "http://order-api.prod.com"
+      timeout: 30
+      verify_ssl: true
+    payment_service:
+      base_url: "http://payment-api.prod.com"
+      timeout: 30
+      verify_ssl: true
+    default:
+      base_url: "http://api.prod.com"
+      timeout: 30
+      verify_ssl: true
 
 # 通用请求头
 headers:
@@ -25,7 +52,7 @@ headers:
 email:
   smtp_host: "smtp.qq.com"
   smtp_port: 465  # QQ邮箱使用465端口进行SSL连接
-  sender: "xxxxxx@qq.com" # 发送者邮箱
-  password: "xxxxxxx"  # QQ邮箱授权码，修改为自己的授权码
+  sender: "xxxxx@qq.com" # 发送者邮箱
+  password: "xxxxxx"  # QQ邮箱授权码，修改为自己的授权码
   receivers: ["xxxxxx@163.com"] # 接收者邮箱
   subject: "API自动化测试报告" 

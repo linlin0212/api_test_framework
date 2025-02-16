@@ -9,27 +9,43 @@ class HTTPClient:
         self.config = YamlHandler.read_yaml("config/config.yaml")
         self.session = requests.Session()
         self.env = self.config['environment']
-        self.base_url = self.config['env'][self.env]['base_url']
         
         # 设置基本请求头
         self.session.headers.update(self.config['headers'])
-        
-        # 设置SSL验证和超时
-        self.session.verify = self.config['env'][self.env]['verify_ssl']
-        self.timeout = self.config['env'][self.env]['timeout']
 
-    def request(self, method, path, **kwargs):
+    def get_service_config(self, service_name=None):
+        """
+        获取服务配置
+        :param service_name: 服务名称，如果为None则使用默认配置
+        :return: 服务配置字典
+        """
+        if not service_name:
+            service_name = 'default'
+            
+        try:
+            return self.config['env'][self.env][service_name]
+        except KeyError:
+            self.logger.warning(f"未找到服务 {service_name} 的配置，使用默认配置")
+            return self.config['env'][self.env]['default']
+
+    def request(self, method, path, service=None, **kwargs):
         """
         发送HTTP请求
         :param method: 请求方法
         :param path: 接口路径
+        :param service: 服务名称
         :param kwargs: 请求参数
         :return: 响应对象
         """
-        url = self.base_url + path
+        # 获取服务配置
+        service_config = self.get_service_config(service)
+        base_url = service_config['base_url']
+        url = base_url + path
         method = method.upper()
         
         # 记录请求信息
+        self.logger.info(f"Service: {service or 'default'}")
+        self.logger.info(f"Environment: {self.env}")
         self.logger.info(f"Request URL: {url}")
         self.logger.info(f"Request Method: {method}")
         self.logger.info(f"Request Headers: {self.session.headers}")
@@ -39,9 +55,9 @@ class HTTPClient:
         elif 'data' in kwargs:
             self.logger.info(f"Request Data: {kwargs['data']}")
         
-        # 设置超时
-        if 'timeout' not in kwargs:
-            kwargs['timeout'] = self.timeout
+        # 设置超时和SSL验证
+        kwargs.setdefault('timeout', service_config.get('timeout', 30))
+        kwargs.setdefault('verify', service_config.get('verify_ssl', True))
 
         try:
             response = self.session.request(method, url, **kwargs)

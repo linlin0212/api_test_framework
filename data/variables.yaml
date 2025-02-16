@@ -1,0 +1,13 @@
+# 存储接口间传递的变量
+variables:
+  # 登录信息
+  token: ""
+  user_id: ""
+  
+  # 订单信息
+  order_id: ""
+  order_no: ""
+  
+  # 支付信息
+  payment_id: ""
+  transaction_no: "" 

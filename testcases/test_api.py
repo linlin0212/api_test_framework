@@ -6,6 +6,7 @@ from datetime import datetime
 from common.http_client import HTTPClient
 from common.assertions import Assertions
 from common.yaml_handler import YamlHandler
+from common.variable_handler import VariableHandler
 
 class TokenManager:
     def __init__(self):
@@ -53,6 +54,7 @@ class TestAPI:
         self.assertions = Assertions()
         self.test_data = YamlHandler.read_yaml("data/test_data.yaml")
         self.token_manager = TokenManager()
+        self.variable_handler = VariableHandler()
     
     def refresh_token(self):
         """
@@ -96,6 +98,12 @@ class TestAPI:
             if not self.token_manager.is_token_valid():
                 self.refresh_token()
         
+        # 替换请求数据中的变量
+        if "headers" in case:
+            case["headers"] = self.variable_handler.replace_variables(case["headers"])
+        if "data" in case:
+            case["data"] = self.variable_handler.replace_variables(case["data"])
+        
         with allure.step(f"准备请求数据"):
             headers = case.get("headers", {})
             if "Authorization" in headers:
@@ -113,7 +121,8 @@ class TestAPI:
             response = self.http_client.request(
                 method=case["method"],
                 path=case["path"],
-                headers=headers,
+                service=case.get("service"),
+                headers=case.get("headers"),
                 json=case.get("data")
             )
             allure.attach(
@@ -121,6 +130,14 @@ class TestAPI:
                 "响应数据",
                 allure.attachment_type.JSON
             )
+        
+        # 保存需要的变量
+        if "save_variables" in case and response.status_code == 200:
+            with allure.step("保存接口返回变量"):
+                self.variable_handler.save_variables(
+                    response.json(),
+                    case["save_variables"]
+                )
         
         # 断言处理
         expected = case["expected"]
