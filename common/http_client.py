@@ -50,18 +50,38 @@ class HTTPClient:
         self.logger.info(f"Request Method: {method}")
         self.logger.info(f"Request Headers: {self.session.headers}")
         
-        if 'json' in kwargs:
-            self.logger.info(f"Request Body: {json.dumps(kwargs['json'], ensure_ascii=False)}")
-        elif 'data' in kwargs:
-            self.logger.info(f"Request Data: {kwargs['data']}")
+        # 处理请求参数
+        request_kwargs = {}
+        
+        # 复制headers
+        if 'headers' in kwargs:
+            request_kwargs['headers'] = kwargs['headers']
+        
+        # 处理请求数据
+        if method == 'GET':
+            # GET请求使用params参数
+            if 'json' in kwargs:
+                request_kwargs['params'] = kwargs['json']
+            elif 'data' in kwargs:
+                request_kwargs['params'] = kwargs['data']
+            
+            if 'params' in request_kwargs:
+                self.logger.info(f"Request Params: {request_kwargs['params']}")
+        else:
+            # POST等其他请求使用json或data参数
+            if 'json' in kwargs:
+                request_kwargs['json'] = kwargs['json']
+                self.logger.info(f"Request Body: {json.dumps(kwargs['json'], ensure_ascii=False)}")
+            elif 'data' in kwargs:
+                request_kwargs['data'] = kwargs['data']
+                self.logger.info(f"Request Data: {kwargs['data']}")
         
         # 设置超时和SSL验证
-        kwargs.setdefault('timeout', service_config.get('timeout', 30))
-        kwargs.setdefault('verify', service_config.get('verify_ssl', True))
+        request_kwargs['timeout'] = service_config.get('timeout', 30)
+        request_kwargs['verify'] = service_config.get('verify_ssl', True)
 
         try:
-            response = self.session.request(method, url, **kwargs)
-            
+            response = self.session.request(method, url, **request_kwargs)
             # 记录响应信息
             self.logger.info(f"Response Status Code: {response.status_code}")
             self.logger.info(f"Response Headers: {response.headers}")

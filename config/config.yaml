@@ -52,7 +52,7 @@ headers:
 email:
   smtp_host: "smtp.qq.com"
   smtp_port: 465  # QQ邮箱使用465端口进行SSL连接
-  sender: "xxxxx@qq.com" # 发送者邮箱
-  password: "xxxxxx"  # QQ邮箱授权码，修改为自己的授权码
-  receivers: ["xxxxxx@163.com"] # 接收者邮箱
+  sender: "xxxx@qq.com" # 发送者邮箱
+  password: "xxxxx"  # QQ邮箱授权码，修改为自己的授权码
+  receivers: ["xxxxx@163.com"] # 接收者邮箱
   subject: "API自动化测试报告" 

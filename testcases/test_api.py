@@ -118,13 +118,21 @@ class TestAPI:
         
         # 发送请求
         with allure.step(f"发送{case['method']}请求到 {case['path']}"):
-            response = self.http_client.request(
-                method=case["method"],
-                path=case["path"],
-                service=case.get("service"),
-                headers=case.get("headers"),
-                json=case.get("data")
-            )
+            request_kwargs = {
+                'method': case["method"],
+                'path': case["path"],
+                'service': case.get("service"),
+                'headers': case.get("headers")
+            }
+            
+            # 添加请求数据
+            if case.get("data"):
+                if case["method"].upper() == "GET":
+                    request_kwargs['data'] = case["data"]
+                else:
+                    request_kwargs['json'] = case["data"]
+            
+            response = self.http_client.request(**request_kwargs)
             allure.attach(
                 json.dumps(response.json(), ensure_ascii=False, indent=2),
                 "响应数据",
