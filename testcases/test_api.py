@@ -150,19 +150,47 @@ class TestAPI:
         # 断言处理
         expected = case["expected"]
         with allure.step("执行断言"):
+            # 状态码断言
             if "status_code" in expected:
-                with allure.step(f"验证状态码: 期望 {expected['status_code']}"):
-                    self.assertions.assert_status_code(response, expected["status_code"])
+                self.assertions.assert_status_code(response, expected["status_code"])
             
-            if "contains_fields" in expected:
-                for field in expected["contains_fields"]:
-                    with allure.step(f"验证字段存在: {field}"):
-                        self.assertions.assert_contains_field(response, field)
+            # 字段类型断言
+            if "field_types" in expected:
+                for jsonpath_expr, expected_type in expected["field_types"].items():
+                    with allure.step(f"验证字段类型: {jsonpath_expr}"):
+                        # 传入的类型可能是字符串，需要转换为实际类型
+                        if isinstance(expected_type, str):
+                            expected_type = eval(expected_type)
+                        self.assertions.assert_field_type(response, jsonpath_expr, expected_type)
             
+            # 字段值断言
             if "field_values" in expected:
-                for field, value in expected["field_values"].items():
-                    with allure.step(f"验证字段值: {field} = {value}"):
-                        self.assertions.assert_field_value(response, field, value)
+                for jsonpath_expr, value in expected["field_values"].items():
+                    with allure.step(f"验证字段值: {jsonpath_expr}"):
+                        self.assertions.assert_field_value(response, jsonpath_expr, value)
+            
+            # 数组断言
+            if "array_assertions" in expected:
+                for jsonpath_expr, assertions in expected["array_assertions"].items():
+                    with allure.step(f"验证数组: {jsonpath_expr}"):
+                        if "length" in assertions:
+                            self.assertions.assert_array_length(response, jsonpath_expr, assertions["length"])
+                        if "contains" in assertions:
+                            for item in assertions["contains"]:
+                                self.assertions.assert_array_contains(response, jsonpath_expr, item)
+                        if "match" in assertions:
+                            match_field = assertions["match"]["field"]
+                            match_value = assertions["match"]["value"]
+                            self.assertions.assert_array_matches(
+                                response, 
+                                jsonpath_expr,
+                                lambda x: x.get(match_field) == match_value
+                            )
+            
+            # 整体响应断言
+            if "response_body" in expected:
+                with allure.step("验证完整响应结构"):
+                    self.assertions.assert_response_body(response, expected["response_body"])
         
         # 如果是登录接口，保存token
         if case["path"] == "/api/login" and response.status_code == 200:
@@ -171,4 +199,7 @@ class TestAPI:
                 self.token_manager.set_token(
                     response_data.get("token"),
                     response_data.get("expire_time")
-                ) 
+                )
+
+                allure.attach("Token已保存", f"token: {self.token_manager.get_token()}", allure.attachment_type.TEXT)
+

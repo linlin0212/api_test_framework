@@ -21,7 +21,7 @@ env:
       verify_ssl: false
     # 默认服务配置
     default:
-      base_url: "http://api.test.com"
+      base_url: "https://gaokao.baidu.com"
       timeout: 10
       verify_ssl: false
       

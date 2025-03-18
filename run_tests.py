@@ -113,9 +113,9 @@ class TestRunner:
                     "--clean"
                 ], shell=True, check=True)
 
-                # 发送邮件
-                self.logger.info("正在发送测试报告邮件...")
-                self.email_handler.send_report(f"{report_path}/index.html")
+                # # 发送邮件
+                # self.logger.info("正在发送测试报告邮件...")
+                # self.email_handler.send_report(f"{report_path}/index.html")
                 
                 # 打开报告
                 self.logger.info("正在尝试打开测试报告...")

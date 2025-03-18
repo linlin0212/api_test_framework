@@ -1,5 +1,6 @@
 import re
 from typing import Any, Dict
+from jsonpath_ng import parse
 from common.yaml_handler import YamlHandler
 from common.logger import Logger
 
@@ -11,7 +12,7 @@ class VariableHandler:
 
     def save_variables(self, response_data: Dict, save_config: Dict) -> None:
         """
-        保存接口响应中的变量
+        保存接口响应中的变量 (支持JSONPath)
         :param response_data: 接口响应数据
         :param save_config: 需要保存的变量配置
         """
@@ -19,8 +20,14 @@ class VariableHandler:
         
         for var_name, path in save_config.items():
             try:
-                # 从响应中提取数据
-                value = self._extract_value(response_data, path)
+                # 检查路径格式
+                if path.startswith('$'):
+                    # JSONPath格式
+                    value = self._extract_jsonpath_value(response_data, path)
+                else:
+                    # 传统点号分隔格式，为兼容性保留
+                    value = self._extract_dot_value(response_data, path)
+                
                 # 更新变量
                 variables['variables'][var_name] = value
                 self.logger.info(f"保存变量: {var_name} = {value}")
@@ -66,9 +73,25 @@ class VariableHandler:
 
         return re.sub(pattern, replace_var, text)
 
-    def _extract_value(self, data: Dict, path: str) -> Any:
+    def _extract_jsonpath_value(self, data: Dict, jsonpath_expr: str) -> Any:
         """
-        从数据中提取指定路径的值
+        使用JSONPath从数据中提取值
+        :param data: 数据字典
+        :param jsonpath_expr: JSONPath表达式，如 "$.data.user.id"
+        :return: 提取的值
+        """
+        jsonpath_expr = parse(jsonpath_expr)
+        matches = [match.value for match in jsonpath_expr.find(data)]
+        
+        if not matches:
+            raise ValueError(f"JSONPath '{jsonpath_expr}' 未匹配到任何内容")
+        
+        # 通常返回第一个匹配结果
+        return matches[0]
+
+    def _extract_dot_value(self, data: Dict, path: str) -> Any:
+        """
+        使用点号分隔路径从数据中提取值 (向后兼容)
         :param data: 数据字典
         :param path: 数据路径，如 "data.user.id"
         :return: 提取的值
@@ -77,8 +100,8 @@ class VariableHandler:
         value = data
         for key in keys:
             if not isinstance(value, dict):
-                raise ValueError(f"无法从路径 {path} 提取数据")
+                raise ValueError(f"无法从路径 {path} 提取数据，'{key}' 处不是字典")
             if key not in value:
-                raise KeyError(f"键 {key} 不存在")
+                raise KeyError(f"键 '{key}' 不存在，路径: {path}")
             value = value[key]
         return value 

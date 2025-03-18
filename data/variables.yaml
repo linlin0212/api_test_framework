@@ -1,13 +1,8 @@
-# 存储接口间传递的变量
 variables:
-  # 登录信息
-  token: ""
-  user_id: ""
-  
-  # 订单信息
-  order_id: ""
-  order_no: ""
-  
-  # 支付信息
-  payment_id: ""
-  transaction_no: "" 
+  order_id: ''
+  order_no: ''
+  payment_id: ''
+  school: 清华大学
+  token: ''
+  transaction_no: ''
+  user_id: ''
