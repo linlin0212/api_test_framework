@@ -50,9 +50,9 @@ test_cases:
     path: "/gk/gkschool/overview"
     method: "GET"
     data:
-       word: "清华大学"
-       query: "清华大学"
-       tab: "intro"
+      word: "清华大学"
+      query: "清华大学"
+      tab: "intro"
     expected:
       status_code: 200
       contains_fields: ["$.data.ai_volunteer_info", "$.data.alumnus"]
@@ -91,33 +91,64 @@ test_cases:
                   xcx_from: "1081000900000000"
                   xcx_path: "/pages/lemma/lemma"
                   xcx_query: "lemmaTitle=%E6%9C%B1%E9%95%95%E5%9F%BA&lemmaId=116302&fr=zjbk_univ_kg"
-
-      # 方式二：整体响应断言
-      # response_body: {
-      #   "errno": 0,
-      #   "errmsg": "success",
-      #   "data": {
-      #     "ai_volunteer_info": {
-      #       "title": "AI志愿推荐",
-      #       "enabled": true,
-      #       "config": {
-      #         "max_schools": 10,
-      #         "min_score": 400
-      #       }
-      #     },
-      #     "alumnus": {
-      #       "imgs": {
-      #         "total": 100,
-      #         "pageSize": 20,
-      #         "imgList": [
-      #           {
-      #             "url": "http://example.com/image1.jpg",
-      #             "type": "jpeg"
-      #           }
-      #         ]
-      #       }
-      #     }
-      #   }
-      # }
     save_variables:
       school: "$.data.school_basic_info.title"
+
+# 场景测试用例
+scenario_cases:
+  - scenario_name: "商品购买流程"
+    description: "从加入购物车到下单支付的完整流程"
+    steps:
+      - step_name: "加入购物车"
+        path: "/api/cart/add"
+        method: "POST"
+        data:
+          product_id: "123"
+          quantity: 1
+        expected:
+          status_code: 200
+          field_values:
+            "$.code": 0
+            "$.message": "success"
+        save_variables:
+          cart_id: "$.data.cart_id"
+
+      - step_name: "创建订单"
+        path: "/api/orders/create"
+        method: "POST"
+        data:
+          cart_id: "${cart_id}"
+          address_id: "456"
+        expected:
+          status_code: 200
+          field_values:
+            "$.code": 0
+            "$.data.order_status": "pending"
+        save_variables:
+          order_id: "$.data.order_id"
+          order_amount: "$.data.amount"
+
+      - step_name: "支付订单"
+        path: "/api/payment/pay"
+        method: "POST"
+        data:
+          order_id: "${order_id}"
+          amount: "${order_amount}"
+          payment_method: "alipay"
+        expected:
+          status_code: 200
+          field_values:
+            "$.code": 0
+            "$.data.payment_status": "success"
+        save_variables:
+          payment_id: "$.data.payment_id"
+
+      - step_name: "查询订单状态"
+        path: "/api/orders/${order_id}"
+        method: "GET"
+        expected:
+          status_code: 200
+          field_values:
+            "$.code": 0
+            "$.data.order_status": "paid"
+            "$.data.payment_status": "success"
